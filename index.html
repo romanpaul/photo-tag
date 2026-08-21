@@ -1,0 +1,327 @@
+
+
+Index · HTML
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Behind the Print</title>
+<meta name="theme-color" content="#16201d">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo+Narrow:wght@400;600&family=Spectral:ital,wght@0,300;0,400;1,300&display=swap" rel="stylesheet">
+ 
+<!-- ============================================================
+     EDIT THIS LIST. Everything else can be left alone.
+ 
+     url      - path to the image. If the photos live in a folder
+                called "photos" next to this file, use "photos/name.jpg"
+     caption  - optional. One line, shown under the photo.
+     place    - optional. Shown in small caps.
+     frames   - optional. Which print(s) this photo belongs to.
+                Only matters if you want specific frames to show
+                specific photos. See the note at the bottom of the file.
+     ============================================================ -->
+<script>
+const PHOTOS = [
+  { url: "photos/example-01.jpg", caption: "The morning we found the shop",     place: "Rockport, MA" },
+  { url: "photos/example-02.jpg", caption: "Low tide, and nobody else awake",   place: "Mystic, CT" },
+  { url: "photos/example-03.jpg", caption: "Carl, unimpressed by the lighthouse", place: "Portland, ME" },
+  { url: "photos/example-04.jpg", caption: "",                                   place: "Bar Harbor, ME" },
+  { url: "photos/example-05.jpg", caption: "Worth the drive",                    place: "Stowe, VT" }
+];
+</script>
+ 
+<style>
+  :root {
+    --ground:      #16201d;
+    --ground-deep: #0d1412;
+    --mat:         #e6e2d6;
+    --mat-shadow:  #b9b3a2;
+    --bevel:       #fbf9f3;
+    --ink:         #21292a;
+    --ink-soft:    #5d6b6a;
+    --brass:       #b08a3e;
+    --mat-pad: clamp(14px, 4.5vw, 34px);
+  }
+ 
+  * { box-sizing: border-box; }
+ 
+  html, body { height: 100%; }
+ 
+  body {
+    margin: 0;
+    background:
+      radial-gradient(120% 80% at 50% 12%, #1d2a26 0%, var(--ground) 45%, var(--ground-deep) 100%);
+    color: var(--mat);
+    font-family: "Spectral", Georgia, serif;
+    font-weight: 300;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: clamp(18px, 4vh, 34px);
+    padding: max(20px, env(safe-area-inset-top)) 20px max(20px, env(safe-area-inset-bottom));
+    -webkit-text-size-adjust: 100%;
+  }
+ 
+  /* ---- the mat: an off-white board with a cut bevel window ---- */
+  .mat {
+    background: var(--mat);
+    padding: var(--mat-pad);
+    max-width: min(620px, 100%);
+    width: 100%;
+    box-shadow:
+      0 1px 0 var(--bevel) inset,
+      0 24px 60px -18px rgba(0,0,0,.75),
+      0 2px 6px rgba(0,0,0,.4);
+  }
+ 
+  .window {
+    position: relative;
+    background: #cfc9b8;
+    border-top:    2px solid var(--mat-shadow);
+    border-left:   2px solid var(--mat-shadow);
+    border-right:  2px solid var(--bevel);
+    border-bottom: 2px solid var(--bevel);
+    min-height: 180px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+  }
+ 
+  .window img {
+    display: block;
+    width: 100%;
+    height: auto;
+    max-height: 68vh;
+    object-fit: contain;
+    opacity: 0;
+    transition: opacity .5s ease;
+  }
+  .window img.is-shown { opacity: 1; }
+ 
+  /* ---- gallery label ---- */
+  .label {
+    margin-top: var(--mat-pad);
+    color: var(--ink);
+    display: flex;
+    align-items: baseline;
+    gap: .7em;
+  }
+ 
+  .label-num {
+    font-family: "Archivo Narrow", Arial Narrow, sans-serif;
+    font-weight: 600;
+    font-size: .78rem;
+    letter-spacing: .14em;
+    color: var(--brass);
+    flex: none;
+    padding-top: .15em;
+  }
+ 
+  .label-text { min-width: 0; }
+ 
+  .caption {
+    font-size: clamp(.98rem, 3.6vw, 1.1rem);
+    font-style: italic;
+    line-height: 1.35;
+    margin: 0;
+  }
+ 
+  .place {
+    font-family: "Archivo Narrow", Arial Narrow, sans-serif;
+    font-size: .72rem;
+    font-weight: 600;
+    letter-spacing: .18em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+    margin: .45em 0 0;
+  }
+ 
+  .caption:empty, .place:empty { display: none; }
+ 
+  /* ---- status text inside the window ---- */
+  .status {
+    font-family: "Archivo Narrow", Arial Narrow, sans-serif;
+    font-size: .74rem;
+    font-weight: 600;
+    letter-spacing: .16em;
+    text-transform: uppercase;
+    color: #6f6a5b;
+    text-align: center;
+    padding: 2.4em 1.6em;
+    line-height: 1.7;
+  }
+  .status[hidden] { display: none; }
+ 
+  /* ---- shuffle control ---- */
+  .again {
+    appearance: none;
+    background: none;
+    border: 1px solid rgba(230,226,214,.28);
+    color: var(--mat);
+    font-family: "Archivo Narrow", Arial Narrow, sans-serif;
+    font-size: .74rem;
+    font-weight: 600;
+    letter-spacing: .2em;
+    text-transform: uppercase;
+    padding: .95em 1.9em;
+    cursor: pointer;
+    transition: border-color .2s ease, color .2s ease;
+  }
+  .again:hover { border-color: var(--brass); color: var(--brass); }
+  .again:focus-visible { outline: 2px solid var(--brass); outline-offset: 3px; }
+  .again[hidden] { display: none; }
+ 
+  @media (prefers-reduced-motion: reduce) {
+    .window img { transition: none; }
+  }
+</style>
+</head>
+<body>
+ 
+  <figure class="mat" id="mat">
+    <div class="window" id="window">
+      <p class="status" id="status">Loading</p>
+      <img id="photo" alt="" hidden>
+    </div>
+    <figcaption class="label" id="label" hidden>
+      <span class="label-num" id="num"></span>
+      <span class="label-text">
+        <p class="caption" id="caption"></p>
+        <p class="place" id="place"></p>
+      </span>
+    </figcaption>
+  </figure>
+ 
+  <button class="again" id="again" hidden>Show another</button>
+ 
+<script>
+(function () {
+  const els = {
+    photo:   document.getElementById("photo"),
+    status:  document.getElementById("status"),
+    label:   document.getElementById("label"),
+    num:     document.getElementById("num"),
+    caption: document.getElementById("caption"),
+    place:   document.getElementById("place"),
+    again:   document.getElementById("again")
+  };
+ 
+  // Optional: a tag can point at ?frame=3 to limit that print to
+  // photos listing 3 in their "frames" array.
+  const frame = new URLSearchParams(location.search).get("frame");
+  let deck = PHOTOS.filter(p => p && p.url);
+  if (frame) {
+    const subset = deck.filter(p => Array.isArray(p.frames) && p.frames.map(String).includes(frame));
+    if (subset.length) deck = subset;
+  }
+ 
+  if (!deck.length) {
+    els.status.textContent = "No photos in the list yet. Add them to the PHOTOS array in this file.";
+    return;
+  }
+ 
+  // Shuffled queue, so nothing repeats until every photo has been seen.
+  let queue = [];
+  function refill(avoid) {
+    const next = deck.slice();
+    for (let i = next.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [next[i], next[j]] = [next[j], next[i]];
+    }
+    if (deck.length > 1 && avoid && next[0].url === avoid.url) {
+      [next[0], next[1]] = [next[1], next[0]];
+    }
+    queue = next;
+  }
+ 
+  let current = null;
+ 
+  function show(item) {
+    current = item;
+    els.photo.classList.remove("is-shown");
+    els.label.hidden = true;
+    els.status.hidden = false;
+    els.status.textContent = "Loading";
+ 
+    const img = new Image();
+    img.onload = function () {
+      els.photo.src = item.url;
+      els.photo.alt = item.caption || item.place || "Photograph";
+      els.photo.hidden = false;
+      els.status.hidden = true;
+      requestAnimationFrame(() => els.photo.classList.add("is-shown"));
+ 
+      els.num.textContent = String(deck.indexOf(item) + 1).padStart(2, "0");
+      els.caption.textContent = item.caption || "";
+      els.place.textContent = item.place || "";
+      els.label.hidden = false;
+      els.again.hidden = deck.length < 2;
+    };
+    img.onerror = function () {
+      els.photo.hidden = true;
+      els.status.hidden = false;
+      els.status.textContent = "This photo didn't load. Check that " + item.url + " is in place.";
+      els.again.hidden = deck.length < 2;
+    };
+    img.src = item.url;
+  }
+ 
+  function next() {
+    if (!queue.length) refill(current);
+    show(queue.shift());
+    // Warm the following image so the next tap is instant.
+    if (queue.length) new Image().src = queue[0].url;
+  }
+ 
+  els.again.addEventListener("click", next);
+  next();
+})();
+</script>
+ 
+<!--
+  ============================================================
+  SETUP, START TO FINISH
+ 
+  1. Put your photos in a folder named "photos" next to this file.
+     Keep filenames simple: lowercase, no spaces.
+     Resize them to about 1600px on the long edge and save as JPG
+     around 80% quality. Full-resolution camera files will be slow
+     over cell service, which is how these will almost always be
+     opened.
+ 
+  2. Edit the PHOTOS list near the top of this file. One line per
+     photo. Only "url" is required.
+ 
+  3. Publish the folder:
+       - GitHub Pages: create a repo, upload index.html and the
+         photos folder, then Settings > Pages > deploy from main.
+       - Cloudflare Pages or Netlify: drag the whole folder into
+         their upload box.
+     You'll get a URL like https://yourname.github.io/print-tags/
+ 
+  4. Open that URL on your phone and confirm it works.
+ 
+  5. Write that same URL to every NFC tag using the NFC Tools app.
+     All the tags carry the identical URL. The randomizing happens
+     here, in this page, not on the tag.
+ 
+  OPTIONAL: PER-FRAME PHOTOS
+  If you'd rather each print pull from its own set of photos, add a
+  "frames" entry to each photo, e.g. frames: [1, 3], and write
+  .../print-tags/?frame=1 to the tag behind print one. A photo with
+  no "frames" entry is only reachable from the plain URL.
+ 
+  CHANGING PHOTOS LATER
+  Edit this file and re-upload. The tags never need to be rewritten,
+  which is the whole point of pointing them at a page instead of at
+  the images directly.
+  ============================================================
+-->
+</body>
+</html>
+ 
